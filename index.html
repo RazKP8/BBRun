@@ -79,8 +79,9 @@ let gameStarted = false;
 
 function initAudio() {
   if (!audioInitialized) {
-    bgMusic.play();
-    audioInitialized = true;
+    bgMusic.play()
+      .then(() => audioInitialized = true)
+      .catch(err => console.warn('Audio error:', err));
   }
 }
 
@@ -110,7 +111,6 @@ function handleJump() {
   if (!gameStarted) {
     gameStarted = true;
     lastTimestamp = performance.now();
-    initAudio();
     return;
   }
 
@@ -127,9 +127,15 @@ function handleJump() {
   }
 }
 
-canvas.addEventListener('touchstart', handleJump);
+canvas.addEventListener('touchstart', () => {
+  initAudio();
+  handleJump();
+});
 document.addEventListener('keydown', e => {
-  if (e.code === 'Space') handleJump();
+  if (e.code === 'Space') {
+    initAudio();
+    handleJump();
+  }
 });
 
 function spawnObstacle() {
