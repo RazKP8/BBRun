@@ -186,8 +186,7 @@ function update(delta) {
     if (checkCollision(rex, obs)) {
       gameOver = true;
       gameOverTime = performance.now();
-bgMusic.pause();    
-}
+    }
   }
 
   rex.frameDelay += delta;
