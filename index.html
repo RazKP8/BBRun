@@ -79,9 +79,17 @@ let gameStarted = false;
 
 function initAudio() {
   if (!audioInitialized) {
-    bgMusic.play()
-      .then(() => audioInitialized = true)
-      .catch(err => console.warn('Audio error:', err));
+    const unlock = () => {
+      bgMusic.play()
+        .then(() => {
+          audioInitialized = true;
+          document.removeEventListener('touchstart', unlock);
+          document.removeEventListener('mousedown', unlock);
+        })
+        .catch(err => console.warn('Audio error:', err));
+    };
+    document.addEventListener('touchstart', unlock);
+    document.addEventListener('mousedown', unlock);
   }
 }
 
@@ -127,16 +135,15 @@ function handleJump() {
   }
 }
 
-canvas.addEventListener('touchstart', () => {
-  initAudio();
-  handleJump();
-});
+canvas.addEventListener('touchstart', handleJump);
+canvas.addEventListener('mousedown', handleJump);
 document.addEventListener('keydown', e => {
   if (e.code === 'Space') {
-    initAudio();
     handleJump();
   }
 });
+
+initAudio();
 
 function spawnObstacle() {
   const types = ['obstacle1', 'obstacle2', 'obstacle3', 'obstacle4'];
