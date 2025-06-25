@@ -103,15 +103,17 @@ function handleJump(event) {
   const now = performance.now();
 
   // הפעלת מוזיקה בלחיצה הראשונה – בתוך האירוע עצמו כדי לעבוד במובייל
-  if (!audioInitialized) {
-    bgMusic.play()
-      .then(() => {
-        audioInitialized = true;
-      })
-      .catch(err => {
-        console.warn("Audio blocked:", err);
-      });
-  }
+ if (!audioInitialized) {
+  bgMusic.play()
+    .then(() => {
+      audioInitialized = true;
+    })
+    .catch(err => {
+      // Some mobile browsers require play to be triggered once more after unlock
+    });
+
+  audioInitialized = true; // Prevent future calls immediately
+}
 
   // התחלת המשחק בלחיצה שנייה
   if (!gameStarted) {
