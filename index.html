@@ -77,22 +77,6 @@ let rex, obstacles, backgroundX, gameOver, obstacleTimer, lastTimestamp, gameOve
 let audioInitialized = false;
 let gameStarted = false;
 
-function initAudio() {
-  if (!audioInitialized) {
-    const unlock = () => {
-      bgMusic.play()
-        .then(() => {
-          audioInitialized = true;
-          document.removeEventListener('touchstart', unlock);
-          document.removeEventListener('mousedown', unlock);
-        })
-        .catch(err => console.warn('Audio error:', err));
-    };
-    document.addEventListener('touchstart', unlock);
-    document.addEventListener('mousedown', unlock);
-  }
-}
-
 function resetGame() {
   rex = {
     x: 100,
@@ -115,15 +99,28 @@ function resetGame() {
 
 resetGame();
 
-function handleJump() {
+function handleJump(event) {
+  const now = performance.now();
+
+  // הפעלת מוזיקה בלחיצה הראשונה – בתוך האירוע עצמו כדי לעבוד במובייל
+  if (!audioInitialized) {
+    bgMusic.play()
+      .then(() => {
+        audioInitialized = true;
+      })
+      .catch(err => {
+        console.warn("Audio blocked:", err);
+      });
+  }
+
+  // התחלת המשחק בלחיצה שנייה
   if (!gameStarted) {
     gameStarted = true;
-    lastTimestamp = performance.now();
+    lastTimestamp = now;
     return;
   }
 
-  const now = performance.now();
-
+  // התחלת משחק חדש אחרי Game Over
   if (gameOver && gameOverTime && now - gameOverTime >= 1000) {
     resetGame();
   } else if (rex.onGround && !gameOver) {
@@ -135,15 +132,11 @@ function handleJump() {
   }
 }
 
-canvas.addEventListener('touchstart', handleJump);
+canvas.addEventListener('touchstart', handleJump, { passive: false });
 canvas.addEventListener('mousedown', handleJump);
 document.addEventListener('keydown', e => {
-  if (e.code === 'Space') {
-    handleJump();
-  }
+  if (e.code === 'Space') handleJump();
 });
-
-initAudio();
 
 function spawnObstacle() {
   const types = ['obstacle1', 'obstacle2', 'obstacle3', 'obstacle4'];
